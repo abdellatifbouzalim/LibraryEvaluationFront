@@ -3,6 +3,7 @@ import Modal from 'react-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import BookService from '../../Services/BookService'; // Assuming you have a BookService similar to UserService
+import { showToastSuccess, showToastError, showToastDeleteConfirmation } from '../../core/utils/Toasts'; // Adjust the import path as needed
 import { toast } from 'react-toastify';
 
 const AddBookModal = () => {
@@ -34,33 +35,28 @@ const AddBookModal = () => {
         summary: summary,
       };
       await BookService.createBook(newBook);
-      toast.success('Book added successfully', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      showToastSuccess('Book added successfully');
       closeModal();
     } catch (error) {
       console.error('Error adding book:', error);
-      toast.error('Failed to add book', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      showToastError('Failed to add book' + error);
     }
+  };
+
+  const handleDeleteConfirmation = (id: number, name: string) => {
+    showToastDeleteConfirmation(id, name, async () => {
+      try {
+        await BookService.deleteBook(id);
+        showToastSuccess('Book deleted successfully');
+      } catch (error) {
+        showToastError('Failed to delete book');
+      }
+    });
   };
 
   return (
     <div>
-      <button onClick={openModal} className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">
+      <button onClick={openModal} className="bg-purple-700 text-white px-4 py-2 rounded mb-4">
         <FontAwesomeIcon icon={faPlus} className="mr-2" /> Add Book
       </button>
       <Modal
@@ -70,7 +66,7 @@ const AddBookModal = () => {
         overlayClassName="overlay"
         ariaHideApp={false}
       >
-        <div className="bg-white rounded-lg w-96 shadow-lg p-6">
+           <div className="bg-white rounded-lg w-[60vh]  shadow-2xl p-6 ml-20 border-4">
           <h2 className="text-2xl mb-4 text-center font-bold text-gray-800">Add Book</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">

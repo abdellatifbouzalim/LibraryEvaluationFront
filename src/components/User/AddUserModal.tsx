@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import UserService from '../../Services/UserService';
 import { toast } from 'react-toastify';
+import { showToastError, showToastSuccess } from '../../core/utils/Toasts';
 
 const AddUserModal = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -28,33 +29,18 @@ const AddUserModal = () => {
         email: email,
       };
       await UserService.createUser(newUser);
-      toast.success('User added successfully', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      showToastSuccess('Loan added successfully');
+      UserService.getAllUsers();
       closeModal();
     } catch (error) {
       console.error('Error adding user:', error);
-      toast.error('Failed to add user', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      showToastError('Failed to add user');
     }
   };
 
   return (
     <div>
-      <button onClick={openModal} className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">
+        <button onClick={openModal} className="bg-purple-700 text-white px-4 py-2 rounded mb-4">
         <FontAwesomeIcon icon={faPlus} className="mr-2" /> Add User
       </button>
       <Modal
@@ -64,7 +50,7 @@ const AddUserModal = () => {
         overlayClassName="overlay"
         ariaHideApp={false}
       >
-        <div className="bg-white rounded-lg w-96 shadow-lg p-6">
+              <div className="bg-white rounded-lg w-[60vh]  shadow-2xl p-6 ml-20 border-4">
           <h2 className="text-2xl mb-4 text-center font-bold text-gray-800">Add User</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">

@@ -3,8 +3,9 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { faEdit, faSave, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import UserService from '../../Services/UserService'; // Assuming you have a UserService similar to MeetingRoomService
-import AddUserModal from './AddUserModal'; // Create this component for adding new users
+import UserService from '../../Services/UserService';
+import AddUserModal from './AddUserModal';
+import { showToastError, showToastInfo, showToastSuccess } from '../../core/utils/Toasts';
 
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -19,20 +20,12 @@ const UserList: React.FC = () => {
         setUsers(fetchedUsers);
       } catch (error) {
         console.error('Error fetching users:', error);
-        toast.error('Failed to fetch users', {
-          position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        showToastError('Failed to fetch users');
       }
     };
 
     fetchUsers();
-},[]);
+  }, []);
 
   const handleEdit = (id: number, username: string, email: string) => {
     setEditedUserId(id);
@@ -45,26 +38,10 @@ const UserList: React.FC = () => {
       await UserService.deleteUser(id);
       const updatedUsers = users.filter(user => user.id !== id);
       setUsers(updatedUsers);
-      toast.success('User deleted successfully', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      showToastSuccess('User deleted successfully');
     } catch (error) {
       console.error('Error deleting user:', error);
-      toast.error('Failed to delete user', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      showToastError('Failed to delete user');
     }
   };
 
@@ -72,15 +49,7 @@ const UserList: React.FC = () => {
     setEditedUserId(null);
     setEditedUsername('');
     setEditedEmail('');
-    toast.info('Edit canceled', {
-      position: 'top-right',
-      autoClose: 3000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+    showToastInfo('Edit canceled');
   };
 
   const handleSaveEdit = async (id: number) => {
@@ -96,52 +65,36 @@ const UserList: React.FC = () => {
       setEditedUserId(null);
       setEditedUsername('');
       setEditedEmail('');
-      toast.success('User updated successfully', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      showToastSuccess('User updated successfully');
     } catch (error) {
       console.error('Error updating user:', error);
-      toast.error('Please try again later. '+ error +' ', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      showToastError(`Failed to update user. ${error}`);
     }
   };
+
   return (
     <div className="mx-auto">
-
       <div className="overflow-x-auto">
         <AddUserModal />
-        <table className="min-w-full divide-y divide-gray-200 shadow-lg rounded-lg overflow-hidden border border-gray-300">
-          <thead className="bg-gray-50">
+        <table className="table-auto min-w-full divide-y divide-gray-200 shadow-lg rounded-lg overflow-hidden border border-purple-700">
+          <thead className="bg-purple-700 text-white ">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium  uppercase tracking-wider">
                 ID
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                 Username
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium  uppercase tracking-wider">
                 Email
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium  uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+            {users.map(user => (
               <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{user.id}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -149,7 +102,7 @@ const UserList: React.FC = () => {
                     <input
                       type="text"
                       value={editedUsername}
-                      onChange={(e) => setEditedUsername(e.target.value)}
+                      onChange={e => setEditedUsername(e.target.value)}
                       className="border border-gray-300 px-3 py-1"
                     />
                   ) : (
@@ -161,7 +114,7 @@ const UserList: React.FC = () => {
                     <input
                       type="text"
                       value={editedEmail}
-                      onChange={(e) => setEditedEmail(e.target.value)}
+                      onChange={e => setEditedEmail(e.target.value)}
                       className="border border-gray-300 px-3 py-1"
                     />
                   ) : (
@@ -187,7 +140,7 @@ const UserList: React.FC = () => {
                   ) : (
                     <button
                       className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
-                      onClick={() => handleEdit(user.id, user.username, user.email)}
+                      onClick={() => handleEdit(user.id, user.username!, user.email!)}
                     >
                       <FontAwesomeIcon icon={faEdit} /> Edit
                     </button>
@@ -203,6 +156,9 @@ const UserList: React.FC = () => {
             ))}
           </tbody>
         </table>
+        {users.length === 0 ? (
+          <p className="text-center text-red-500">Users Table is empty !!</p>
+        ) : (   <p></p>)}
       </div>
     </div>
   );

@@ -6,4 +6,11 @@ export const UserInstance = axios.create({
 });
 export const BookInstance = axios.create({
     baseURL: `${BASE_URL}/books`
-  });
+});
+export const LoanInstance = axios.create({
+    baseURL: `${BASE_URL}/loans`
+});
+export const ReviewInstance = axios.create({
+    baseURL: `${BASE_URL}/reviews`
+});
+

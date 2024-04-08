@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { faEdit, faSave, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import BookService from '../../Services/BookService'; // Assuming you have a BookService similar to UserService
-import AddBookModal from './AddBookModal'; // Create this component for adding new books
+import BookService from '../../Services/BookService';
+import AddBookModal from './AddBookModal';
+import { showToastDeleteConfirmation, showToastError, showToastInfo, showToastSuccess } from '../../core/utils/Toasts';
 
 const BookList: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -20,21 +19,12 @@ const BookList: React.FC = () => {
         const fetchedBooks = await BookService.getAllBooks();
         setBooks(fetchedBooks);
       } catch (error) {
-        console.error('Error fetching books:', error);
-        toast.error('Failed to fetch books', {
-          position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        showToastError('Failed to fetch books');
       }
     };
 
     fetchBooks();
-  },[]);
+  }, []);
 
   const handleEdit = (id: number, title: string, author: string, genre: string, summary: string) => {
     setEditedBookId(id);
@@ -45,31 +35,16 @@ const BookList: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    try {
-      await BookService.deleteBook(id);
-      const updatedBooks = books.filter(book => book.id !== id);
-      setBooks(updatedBooks);
-      toast.success('Book deleted successfully', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    } catch (error) {
-      console.error('Error deleting book:', error);
-      toast.error('Failed to delete book', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    }
+    showToastDeleteConfirmation(id, "book", async () => {
+      try {
+        await BookService.deleteBook(id);
+        const updatedBooks = books.filter(book => book.id !== id);
+        setBooks(updatedBooks);
+        showToastSuccess('Book deleted successfully');
+      } catch (error) {
+        showToastError('Failed to delete book');
+      }
+    });
   };
 
   const handleCancelEdit = () => {
@@ -78,15 +53,7 @@ const BookList: React.FC = () => {
     setEditedAuthor('');
     setEditedGenre('');
     setEditedSummary('');
-    toast.info('Edit canceled', {
-      position: 'top-right',
-      autoClose: 3000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+    showToastInfo('Edit canceled');
   };
 
   const handleSaveEdit = async (id: number) => {
@@ -115,26 +82,9 @@ const BookList: React.FC = () => {
       setEditedAuthor('');
       setEditedGenre('');
       setEditedSummary('');
-      toast.success('Book updated successfully', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      showToastSuccess('Book updated successfully');
     } catch (error) {
-      console.error('Error updating book:', error);
-      toast.error('Please try again later. ' + error + ' ', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      showToastError(`Failed to update book. ${error}`);
     }
   };
 
@@ -143,24 +93,24 @@ const BookList: React.FC = () => {
       <div className="overflow-x-auto">
         <AddBookModal />
         <table className="min-w-full divide-y divide-gray-200 shadow-lg rounded-lg overflow-hidden border border-gray-300">
-          <thead className="bg-gray-50">
+        <thead className="bg-purple-700 text-white ">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                 ID
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium  uppercase tracking-wider">
                 Title
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium  uppercase tracking-wider">
                 Author
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium  uppercase tracking-wider">
                 Genre
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium  uppercase tracking-wider">
                 Summary
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium  uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -236,7 +186,7 @@ const BookList: React.FC = () => {
                   ) : (
                     <button
                       className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
-                      onClick={() => handleEdit(book.id, book.title, book.author, book.genre, book.summary)}
+                      onClick={() => handleEdit(book.id, book.title!, book.author!, book.genre!, book.summary!)}
                     >
                       <FontAwesomeIcon icon={faEdit} /> Edit
                     </button>
@@ -252,8 +202,15 @@ const BookList: React.FC = () => {
             ))}
           </tbody>
         </table>
+
+        {books.length === 0 ? (
+          <p className="text-center text-red-500">Books Table is empty !!</p>
+        ) : (   <p></p>)}
+      
       </div>
+      
     </div>
+    
   );
 };
 
